@@ -8,11 +8,13 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options 
 from selenium.webdriver.common.by import By
+import BeverAPI
 
 
 url = "https://www.bever.nl/c/heren/jassen/zomerjassen.html"
 outputfile = 'Beverbot.csv'
 products = []
+productNrs = []
 
 
 def getBrowser():
@@ -42,11 +44,9 @@ def BeverGetURLFromPage(browser:webdriver.Firefox, page):
     URLS = []
     Products = browser.find_elements(By.XPATH, "//a[@class = 'as-a-link as-a-link--container as-m-product-tile__link']")
     
-    for thng in Products:
-        print(thng.get_attribute("href"))
-    
-    
-    
+    for thing in Products:
+        print(thing.get_attribute("href"))
+
     for element in Products:
         link = element.get_attribute("href")
         if(not "https://www.bever.nl" in link):
@@ -56,26 +56,28 @@ def BeverGetURLFromPage(browser:webdriver.Firefox, page):
     return URLS
 
 def BeverGetProductData(browser:webdriver.Firefox, url):
-    try:
-        browser.get(url)
+    SkuNr = BeverAPI.BeverGetSKUNr(url)
+    if(not SkuNr in productNrs):
+
         try:
-            browser.find_element(By.ID, 'accept-all-cookies').click()
+            browser.get(url)
+            try:
+                browser.find_element(By.ID, 'accept-all-cookies').click()
+            except:
+                None
+            #Get info
+            
+            brand = browser.find_element(By.XPATH, "//a[@class = 'as-a-link as-a-link--base']").text
+            product = browser.find_element(By.XPATH, "//span[@class = 'as-a-text as-a-text--title']").text
+            price = browser.find_element(By.XPATH, "//span[@data-qa = 'sell_price']").text.replace('€', '').replace(",",".")
+            
+            info = [SkuNr,brand, product, price]
+            products.append(info)
+            productNrs.append(SkuNr)
+            BeverAPI.BeverGetReviewsFromURL(url)
         except:
             None
-        #Get info
-        brand = browser.find_element(By.XPATH, "//a[@class = 'as-a-link as-a-link--base']").text
-        product = browser.find_element(By.XPATH, "//span[@class = 'as-a-text as-a-text--title']").text
-        price = browser.find_element(By.XPATH, "//span[@data-qa = 'sell_price']").text.replace('€', '').replace(",",".")
         
-        info = [brand, product, price]
-        if(not info in products):
-            products.append(info)
-    except:
-        None
-        
-def BeverGetReviewsFromURL(url:str, amount:int):
-   skuNr = url.split("-")[-1].split(".")[0]
-   requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=3&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page=1")
     
     
 
@@ -85,7 +87,6 @@ def BeverGetReviewsFromURL(url:str, amount:int):
 def writeToOutput(item):
     with open(outputfile, 'a', encoding="utf8", newline="") as out:
         write = writer(out)
-        #print(item)
         write.writerow(item)
 
 def stringInOutput(item):
@@ -109,7 +110,7 @@ def setupOutputFile():
 
 
 
-#Threading
+#=====================Threading==================================================
 class MyThread(Thread):
     def __init__(self, name):
         """Initialize the thread"""
@@ -122,7 +123,9 @@ class MyThread(Thread):
         threadNumber = int(threadName.split('#')[1]) #Convert the string containing the Thread name to a int for use in lists
         browser = getBrowser()
         while len(links) > 0:
-            BeverGetProductData(browser, links.pop())
+            link = links.pop()
+            BeverGetProductData(browser, link)
+            print(threadName +" Finished "+ BeverAPI.BeverGetSKUNr(link))
         browser.close()
 
         
@@ -135,10 +138,16 @@ def create_threads():
         name = "Thread #%s" % (i)
         my_thread = MyThread(name)
         my_thread.start()
-    my_thread.join()
+    my_thread.join() 
     time.sleep(5)
+    
+    writeToOutput(["sku","brand","product","price"])
     for product in products:
         writeToOutput(product)
+        
+    BeverAPI.BeverAPIWriteDataToJsonFile()
+    BeverAPI.BeverAPIWriteDataToCSVFile()
+    print(len(productNrs))
 
 if __name__ == "__main__":
     browser = getBrowser()
