@@ -49,7 +49,6 @@ def BeverGetReviewsFromURL(url:str):
     
 
 
-    
 def BeverGetReviewFromURL(skuNr, pagenr:int, outfile):
     request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=3&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page="+str(pagenr))
     data = json.loads(request.content)
@@ -78,8 +77,6 @@ def BeverGetReviewFromURL(skuNr, pagenr:int, outfile):
     
       
    
-    
-    
 # BeverGetReviewsFromURL("https://www.bever.nl/p/ayacucho-annapurna-softshell-B12AD90130.html?colour=4168")
 
 

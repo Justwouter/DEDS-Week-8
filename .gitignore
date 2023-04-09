@@ -1,3 +1,8 @@
+#Custom exclusions
+*.csv
+*.log*.xlsx
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
