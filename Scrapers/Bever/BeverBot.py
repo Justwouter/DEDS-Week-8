@@ -1,8 +1,6 @@
 import csv
-import os
-from threading import Thread
+from threading import Thread, Lock
 import time
-import requests
 from csv import writer
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -58,7 +56,7 @@ def BeverGetURLFromPage(browser:webdriver.Firefox, page):
 def BeverGetProductData(browser:webdriver.Firefox, url):
     SkuNr = BeverAPI.BeverGetSKUNr(url)
     if(not SkuNr in productNrs):
-
+        productNrs.append(SkuNr)
         try:
             browser.get(url)
             try:
@@ -73,7 +71,6 @@ def BeverGetProductData(browser:webdriver.Firefox, url):
             
             info = [SkuNr,brand, product, price]
             products.append(info)
-            productNrs.append(SkuNr)
             BeverAPI.BeverGetReviewsFromURL(url)
         except:
             None
@@ -102,6 +99,7 @@ def setupOutputFile():
     with open(outputfile, 'w', encoding="utf8", newline="") as out:
         out.write("")
         
+        
 
 
 
@@ -111,19 +109,23 @@ def setupOutputFile():
 
 
 #=====================Threading==================================================
+lock = Lock()
 class MyThread(Thread):
+    links = []
+    
     def __init__(self, name):
-        """Initialize the thread"""
         Thread.__init__(self)
         self.name = name
 
     def run(self):
-        """Run the thread"""
         threadName = self.name
-        threadNumber = int(threadName.split('#')[1]) #Convert the string containing the Thread name to a int for use in lists
         browser = getBrowser()
         while len(links) > 0:
+            
+            lock.acquire()
             link = links.pop()
+            lock.release()
+            
             BeverGetProductData(browser, link)
             print(threadName +" Finished "+ BeverAPI.BeverGetSKUNr(link))
         browser.close()
@@ -131,9 +133,6 @@ class MyThread(Thread):
         
 
 def create_threads():
-    """
-    Create a group of threads
-    """
     for i in range(int(len(links)/50)): #Spawns a thread for each entry in a list threads (len(urls))
         name = "Thread #%s" % (i)
         my_thread = MyThread(name)
@@ -151,7 +150,6 @@ def create_threads():
 
 if __name__ == "__main__":
     browser = getBrowser()
-    global links
     setupOutputFile()
     links = BeverLoadFindAllURLs(browser, url)
     print(len(links))
