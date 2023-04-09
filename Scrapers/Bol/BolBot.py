@@ -7,23 +7,21 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options 
 from selenium.webdriver.common.by import By
 
-url = "https://www.bol.com/nl/nl/l/rugzakken/20701/"
-outputfile = 'bol.csv'
+url = "https://www.bol.com/nl/nl/l/jassen/47445/"
+outputfile = 'bol.txt'
 links = []
 
 def writeToOutput(item):
     with open(outputfile, 'a', encoding="utf8", newline="") as out:
-        write = writer(out)
-        write.writerow(item)
+        out.write(item+"\n")
         
 def getBrowser():
     ffoptions = Options()
     #ffoptions.add_argument("--headless")
     return webdriver.Firefox(options=ffoptions)    
 
-def BolGetProductsByURL(browser: webdriver.Firefox, url):
-    browser.get(url)
-    BolRefuseCookies(browser)
+def BolGetProductsByURL(browser: webdriver.Firefox, link):
+    BolRefuseCookies(browser, link)
     products = browser.find_elements(By.XPATH, "//a[@class = 'product-title product-title--placeholder px_list_page_product_click list_page_product_tracking_target']")
     print(len(products))
     for element in products:
@@ -31,8 +29,8 @@ def BolGetProductsByURL(browser: webdriver.Firefox, url):
         writeToOutput(element.get_attribute("title"))
 
 
-def BolRefuseCookies(browser: webdriver.Firefox):
-    browser.get(url)
+def BolRefuseCookies(browser: webdriver.Firefox, link):
+    browser.get(link)
     try:
         browser.find_element(By.ID, "js-reject-all-button").click()
     except:
@@ -50,9 +48,12 @@ class MyThread(Thread):
         threadName = self.name
         browser = getBrowser()
         while len(links) > 0:
+            
             lock.acquire()
             pageNr = links.pop()
             lock.release()
+            
+            
             link = url+"?page="+str(pageNr)
             BolGetProductsByURL(browser, link)
         browser.close()
@@ -61,7 +62,7 @@ class MyThread(Thread):
 
 def create_threads():
     start_time = time.time()
-    for i in range(int(len(links)/5)): #Spawns a thread for each entry in a list threads (len(urls))
+    for i in range(int(len(links)/50)+1): #Spawns a thread for each entry in a list threads (len(urls))
         name = "Thread #%s" % (i)
         my_thread = MyThread(name)
         my_thread.start()
@@ -72,7 +73,7 @@ def create_threads():
     time.sleep(5)
     
 if __name__ == "__main__":
-    for i in range(1,50):
+    for i in range(1,500):
         links.append(i)
     create_threads()
     
