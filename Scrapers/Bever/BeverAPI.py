@@ -42,14 +42,14 @@ def BeverGetReviewsFromURL(url:str):
     nrOfPages = int(data["body"]["pagination"]["total_pages"])
     
     for i in range(nrOfPages):
-        data = BeverGetReviewFromURL(skuNr, i+1, outfile)
+        data = BeverGetReviewFromURL(skuNr, i+1)
         if not data == None and not data in storageList:
             storageList.append(data)
         
     
 
 
-def BeverGetReviewFromURL(skuNr, pagenr:int, outfile):
+def BeverGetReviewFromURL(skuNr, pagenr:int):
     request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=3&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page="+str(pagenr))
     data = json.loads(request.content)
     data = data["body"]["reviews"]
@@ -71,7 +71,8 @@ def BeverGetReviewFromURL(skuNr, pagenr:int, outfile):
             appendToList(badpoints, thingy["text"]["bad_points"])
         except:
             None
-    if len(goodPoints) > 0 or len(badpoints > 0):
+            
+    if len(goodPoints) > 0 or len(badpoints) > 0:
         return [skuNr,rating,goodPoints,badpoints]
     return None
     
