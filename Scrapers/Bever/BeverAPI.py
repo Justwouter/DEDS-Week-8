@@ -1,8 +1,9 @@
 from csv import writer
+import os
 import requests
 import json
 
-outfile = "data"
+outfile = os.path.dirname(__file__)+"/output/data"
 storageList = []
 
 #======File managment=======

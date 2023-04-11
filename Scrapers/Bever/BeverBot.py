@@ -1,4 +1,5 @@
 import csv,time
+import os
 from threading import Thread, Lock 
 from csv import writer
 from bs4 import BeautifulSoup
@@ -10,7 +11,7 @@ import BeverAPI
 
 
 url = "https://www.bever.nl/c/heren/jassen/zomerjassen.html"
-outputfile = 'Beverbot.csv'
+outputfile = os.path.dirname(__file__)+'/output/Beverbot.csv'
 products = []
 productNrs = []
 wait = None
