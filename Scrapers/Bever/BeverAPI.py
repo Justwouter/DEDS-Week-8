@@ -35,22 +35,25 @@ def BeverGetSKUNr(url:str):
 
 def BeverGetReviewsFromURL(url:str):
    skuNr = BeverGetSKUNr(url)
-   request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=3&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page=1")
+   request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=10&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page=1")
    if(request.ok):
     data = json.loads(request.content)
 
     nrOfPages = int(data["body"]["pagination"]["total_pages"])
-    
+    DEBUG = []
     for i in range(nrOfPages):
-        data = BeverGetReviewFromURL(skuNr, i+1)
+        data = BeverGetReviewFromSKU(skuNr, i+1)
         if not data == None and not data in storageList:
+            DEBUG.append(data)
             storageList.append(data)
+    if(skuNr == "HABFA62001"):
+        print(len(DEBUG)+"!!(!(@(@(@(@(@((@(@(@(@((@(@(@(@(@(@((@(@(@@((@(@(@(@(()))))))))))))))))))))))))))))")
         
     
 
 
-def BeverGetReviewFromURL(skuNr, pagenr:int):
-    request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=3&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page="+str(pagenr))
+def BeverGetReviewFromSKU(skuNr, pagenr:int):
+    request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=10&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page="+str(pagenr))
     data = json.loads(request.content)
     data = data["body"]["reviews"]
     
@@ -75,9 +78,13 @@ def BeverGetReviewFromURL(skuNr, pagenr:int):
     if len(goodPoints) > 0 or len(badpoints) > 0:
         return [skuNr,rating,goodPoints,badpoints]
     return None
-    
+
+
+def BeverGetProductImageFrom(skuNr):
+    request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=3&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page=1")
+    data = json.loads(request.content)
+    data = data["body"]["reviews"]
       
    
 # BeverGetReviewsFromURL("https://www.bever.nl/p/ayacucho-annapurna-softshell-B12AD90130.html?colour=4168")
-
 

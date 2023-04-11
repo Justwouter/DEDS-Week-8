@@ -1,6 +1,5 @@
-import csv
-from threading import Thread, Lock
-import time
+import csv,time
+from threading import Thread, Lock 
 from csv import writer
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -10,7 +9,7 @@ import selenium.webdriver.support.ui as ui
 import BeverAPI
 
 
-url = "https://www.bever.nl/c/heren/jassen/zomerjassen.html"
+url = "https://www.bever.nl/c/heren/schoenen/wandelschoenen.html"
 outputfile = 'Beverbot.csv'
 products = []
 productNrs = []
@@ -26,8 +25,7 @@ def getBrowser():
 def BeverInitialSetup(browser:webdriver.Firefox):
     browser.get(url)
     browser.find_element(By.ID, 'accept-all-cookies').click()
-    # pageAmount = browser.find_element(By.XPATH, "/html/body/div[1]/div[3]/div[2]/div/div/div/div[9]/div/div/a[3]/span").get_attribute("textContent")
-    
+        
     #Find the pagination and take the last element after the "->" which displays the total amount of pages. Can't get the number directly so get the link and add one because page=0 doesn't exist in the selector
     #Bit janky but it works on every page without an explicit Xpath
     pageAmount = int(browser.find_elements(By.XPATH, "//a[@class = 'as-a-btn as-a-btn--pagination as-m-pagination__item']")[-2].get_attribute("href").split("=")[-1])+1
@@ -75,11 +73,11 @@ def BeverGetProductData(browser:webdriver.Firefox, url):
             brand = browser.find_element(By.XPATH, "//a[@class = 'as-a-link as-a-link--base']").text
             product = browser.find_element(By.XPATH, "//span[@class = 'as-a-text as-a-text--title']").text
             price = browser.find_element(By.XPATH, "//span[@data-qa = 'sell_price']").text.replace('€', '').replace(",",".")
-            wait.until(lambda WaitForImagesToLoad: browser.find_element(By.XPATH, "//img[@class = 'as-a-image as-m-slide__thumb-img lazyautosizes ls-is-cached lazyloaded']"))
-            image =  browser.find_element(By.XPATH, "//img[contains(@class, 'as-a-image as-m-slide__thumb-img lazyautosizes ls-is-cached lazyloaded')]").get_property("src")                     
-            print(image)
+            # wait.until(lambda WaitForImagesToLoad: browser.find_element(By.XPATH, "//img[@class = 'as-a-image as-m-slide__thumb-img lazyautosizes ls-is-cached lazyloaded']"))
+            # image =  browser.find_element(By.XPATH, "//img[contains(@class, 'as-a-image as-m-slide__thumb-img lazyautosizes ls-is-cached lazyloaded')]").get_property("src").replace("65x98","550x825")
+            # print(image)
             
-            info = [SkuNr,brand, product, price,image]
+            info = [SkuNr,brand, product, price]
             products.append(info)
             BeverAPI.BeverGetReviewsFromURL(url)
         except:
@@ -143,7 +141,7 @@ class MyThread(Thread):
         
 
 def create_threads():
-    for i in range(int(len(links)/50)): #Spawns a thread for each entry in a list threads (len(urls))
+    for i in range(int(len(links)/50)):
         name = "Thread #%s" % (i)
         my_thread = MyThread(name)
         my_thread.start()
