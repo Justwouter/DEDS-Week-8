@@ -20,6 +20,16 @@ def BeverAPIWriteDataToCSVFile():
         for entry in storageList:
             write.writerow(entry)
             
+def BeverAPIWriteDataAsLinesToCSVFile():
+    with open(outfile+".csv", 'w', encoding="utf8", newline="") as out:
+        write = writer(out)
+        write.writerow(["sku","rating","good points","bad points"])
+    with open(outfile+".csv", 'a', encoding="utf8", newline="") as out:
+        write = writer(out)
+        for entry in storageList:
+            for review in entry:
+                write.writerow(review)
+            
             
 #======Helpers===========
 
@@ -40,14 +50,13 @@ def BeverGetReviewsFromURL(url:str):
     data = json.loads(request.content)
 
     nrOfPages = int(data["body"]["pagination"]["total_pages"])
-    DEBUG = []
+    print(nrOfPages)
     for i in range(nrOfPages):
-        data = BeverGetReviewFromSKU(skuNr, i+1)
+        data = BeverGetReviewFromSKU_AsLines(skuNr, i+1)
         if not data == None and not data in storageList:
-            DEBUG.append(data)
             storageList.append(data)
-    if(skuNr == "HABFA62001"):
-        print(len(DEBUG)+"!!(!(@(@(@(@(@((@(@(@(@((@(@(@(@(@(@((@(@(@@((@(@(@(@(()))))))))))))))))))))))))))))")
+        # print(str(data) + " " + str(i))
+        # print(len(storageList))
         
     
 
@@ -79,12 +88,31 @@ def BeverGetReviewFromSKU(skuNr, pagenr:int):
         return [skuNr,rating,goodPoints,badpoints]
     return None
 
-
-def BeverGetProductImageFrom(skuNr):
-    request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=3&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page=1")
+def BeverGetReviewFromSKU_AsLines(skuNr, pagenr:int):
+    request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=10&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page="+str(pagenr))
     data = json.loads(request.content)
     data = data["body"]["reviews"]
+    reviews = []
+
+    for entry in data:
+        review = [skuNr]
+        try:
+            review.append(entry["overall_score"])
+        
+            review.append(entry["text"]["good_points"].replace("\n"," "))
+       
+            review.append(entry["text"]["bad_points"].replace("\n"," "))
+        except:
+            continue
+        reviews.append(review)
+        
+    return reviews
+
+# def BeverGetProductImageFrom(skuNr):
+#     request = requests.get("https://widgets.reevoo.com/api/product_reviews?per_page=3&trkref=BEV&sku="+skuNr+"&locale=nl-NL&display_mode=embedded&page=1")
+#     data = json.loads(request.content)
+#     data = data["body"]["reviews"]
       
    
-# BeverGetReviewsFromURL("https://www.bever.nl/p/ayacucho-annapurna-softshell-B12AD90130.html?colour=4168")
-
+# BeverGetReviewsFromURL("https://www.bever.nl/p/lowa-renegade-gtx-mid-HABFA62001.html?colour=4169")
+# BeverAPIWriteDataAsLinesToCSVFile()
