@@ -9,7 +9,7 @@ import selenium.webdriver.support.ui as ui
 import BeverAPI
 
 
-url = "https://www.bever.nl/c/heren/schoenen/wandelschoenen.html"
+url = "https://www.bever.nl/c/heren/jassen/zomerjassen.html"
 outputfile = 'Beverbot.csv'
 products = []
 productNrs = []
@@ -19,7 +19,7 @@ lock = Lock()
 
 def getBrowser():
     ffoptions = Options()
-    #ffoptions.add_argument("--headless")
+    ffoptions.add_argument("--headless")
     return webdriver.Firefox(options=ffoptions)    
 
 def BeverInitialSetup(browser:webdriver.Firefox):
@@ -80,8 +80,11 @@ def BeverGetProductData(browser:webdriver.Firefox, url):
             info = [SkuNr,brand, product, price]
             products.append(info)
             BeverAPI.BeverGetReviewsFromURL(url)
+            return True
         except:
             None
+    else:
+        return False
         
     
     
@@ -134,8 +137,11 @@ class MyThread(Thread):
             link = links.pop()
             lock.release()
             
-            BeverGetProductData(browser, link)
-            print(threadName +" Finished "+ BeverAPI.BeverGetSKUNr(link))
+            if BeverGetProductData(browser, link):
+                print(threadName +" Finished "+ BeverAPI.BeverGetSKUNr(link))
+            else:
+                print(threadName +" Skipped "+ BeverAPI.BeverGetSKUNr(link))
+
         browser.close()
 
         
@@ -153,7 +159,7 @@ def create_threads():
         writeToOutput(product)
         
     BeverAPI.BeverAPIWriteDataToJsonFile()
-    BeverAPI.BeverAPIWriteDataToCSVFile()
+    BeverAPI.BeverAPIWriteDataAsLinesToCSVFile()
     print(len(productNrs))
 
 if __name__ == "__main__":

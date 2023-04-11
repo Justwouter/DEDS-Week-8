@@ -53,7 +53,7 @@ def BeverGetReviewsFromURL(url:str):
     print(nrOfPages)
     for i in range(nrOfPages):
         data = BeverGetReviewFromSKU_AsLines(skuNr, i+1)
-        if not data == None and not data in storageList:
+        if not data == None : #and not data in storageList
             storageList.append(data)
         # print(str(data) + " " + str(i))
         # print(len(storageList))
@@ -97,12 +97,15 @@ def BeverGetReviewFromSKU_AsLines(skuNr, pagenr:int):
     for entry in data:
         review = [skuNr]
         try:
-            review.append(entry["overall_score"])
-        
-            review.append(entry["text"]["good_points"].replace("\n"," "))
-       
-            review.append(entry["text"]["bad_points"].replace("\n"," "))
-        except:
+            score = entry["overall_score"]
+            goodPoints = entry["text"]["good_points"].replace("\n"," ")
+            badPoints = entry["text"]["bad_points"].replace("\n"," ")
+
+            review.append(score)
+            review.append(goodPoints)
+            review.append(badPoints)
+        except Exception as e:
+            #print(e)
             continue
         reviews.append(review)
         
