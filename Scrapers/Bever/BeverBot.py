@@ -74,11 +74,10 @@ def BeverGetProductData(browser:webdriver.Firefox, url):
             brand = browser.find_element(By.XPATH, "//a[@class = 'as-a-link as-a-link--base']").text
             product = browser.find_element(By.XPATH, "//span[@class = 'as-a-text as-a-text--title']").text
             price = browser.find_element(By.XPATH, "//span[@data-qa = 'sell_price']").text.replace('€', '').replace(",",".")
-            # wait.until(lambda WaitForImagesToLoad: browser.find_element(By.XPATH, "//img[@class = 'as-a-image as-m-slide__thumb-img lazyautosizes ls-is-cached lazyloaded']"))
-            # image =  browser.find_element(By.XPATH, "//img[contains(@class, 'as-a-image as-m-slide__thumb-img lazyautosizes ls-is-cached lazyloaded')]").get_property("src").replace("65x98","550x825")
-            # print(image)
+            wait.until(lambda WaitForImagesToLoad: browser.find_element(By.XPATH, "//img[@class = 'as-a-image as-m-slide__thumb-img lazyautosizes ls-is-cached lazyloaded']"))
+            image =  browser.find_element(By.XPATH, "//img[contains(@class, 'as-a-image as-m-slide__thumb-img lazyautosizes ls-is-cached lazyloaded')]").get_property("src").replace("65x98","550x825")
             
-            info = [SkuNr,brand, product, price]
+            info = [SkuNr,brand, product, price, image]
             products.append(info)
             BeverAPI.BeverGetReviewsFromURL(url)
             return True
@@ -103,7 +102,6 @@ def stringInOutput(item):
         items = csv.reader(out, delimiter=",")
         for line in items:
             if item[1] in line[1] and item[2] == line[2]:
-                print("IM WORKING!")
                 return True
     return False
 
