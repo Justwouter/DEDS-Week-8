@@ -3,6 +3,7 @@ import os
 from threading import Thread, Lock 
 from csv import writer
 from bs4 import BeautifulSoup
+import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options 
 from selenium.webdriver.common.by import By
@@ -10,7 +11,8 @@ import selenium.webdriver.support.ui as ui
 import BeverAPI
 
 
-url = "https://www.bever.nl/c/heren/jassen/zomerjassen.html"
+url = "https://www.bever.nl/c/heren/schoenen.html"
+outputpath = os.path.dirname(__file__)+'/output/'
 outputfile = os.path.dirname(__file__)+'/output/Beverbot.csv'
 products = []
 productNrs = []
@@ -79,13 +81,19 @@ def BeverGetProductData(browser:webdriver.Firefox, url):
             
             info = [SkuNr,brand, product, price, image]
             products.append(info)
+            BeverDownloadImage(image,SkuNr)
             BeverAPI.BeverGetReviewsFromURL(url)
             return True
         except:
             None
     else:
         return False
-        
+
+def BeverDownloadImage(url, sku):
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(outputpath+"Images/"+sku+".jpg", 'wb') as f:
+            f.write(response.content)
     
     
 
@@ -146,6 +154,8 @@ class MyThread(Thread):
         
 
 def create_threads():
+    start_time = time.time()
+    
     for i in range(int(len(links)/50)):
         name = "Thread #%s" % (i)
         my_thread = MyThread(name)
@@ -160,6 +170,10 @@ def create_threads():
     BeverAPI.BeverAPIWriteDataToJsonFile()
     BeverAPI.BeverAPIWriteDataAsLinesToCSVFile()
     print(len(productNrs))
+    
+    end_time = time.time()
+    time_elapsed = end_time - start_time
+    print("Time elapsed:", time_elapsed, "seconds")
 
 if __name__ == "__main__":
     browser = getBrowser()
