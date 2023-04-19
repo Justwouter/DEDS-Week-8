@@ -11,7 +11,7 @@ import selenium.webdriver.support.ui as ui
 import BeverAPI
 
 
-url = "https://www.bever.nl/c/heren/jassen.html"
+url = "https://www.bever.nl/c/heren/schoenen.html"
 outputpath = os.path.dirname(__file__)+'/output/'
 outputfile = os.path.dirname(__file__)+'/output/Beverbot.csv'
 products = []
@@ -148,7 +148,7 @@ class MyThread(Thread):
                 print(threadName +" Finished "+ BeverAPI.BeverGetSKUNr(link))
             else:
                 print(threadName +" Skipped "+ BeverAPI.BeverGetSKUNr(link))
-
+        
         browser.close()
 
         

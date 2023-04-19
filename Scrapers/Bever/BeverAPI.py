@@ -30,8 +30,18 @@ def BeverAPIWriteDataAsLinesToCSVFile():
         for entry in storageList:
             for review in entry:
                 write.writerow(review)
-            
-            
+                
+def BeverAPIWriteReviewsLooseLiness():
+    with open(outfile+".txt", 'w', encoding="utf8", newline="") as out:
+        write = writer(out, delimiter=".")
+        for entry in storageList:
+            for review in entry:
+                write.writerow(review[2:] for i in review[2:])
+                
+                
+                
+                
+
 #======Helpers===========
 
 def appendToList(list, data):
@@ -118,5 +128,6 @@ def BeverGetReviewFromSKU_AsLines(skuNr, pagenr:int):
 #     data = data["body"]["reviews"]
       
    
-# BeverGetReviewsFromURL("https://www.bever.nl/p/lowa-renegade-gtx-mid-HABFA62001.html?colour=4169")
-# BeverAPIWriteDataAsLinesToCSVFile()
+BeverGetReviewsFromURL("https://www.bever.nl/p/lowa-renegade-gtx-mid-HABFA62001.html?colour=4169")
+BeverAPIWriteDataAsLinesToCSVFile()
+BeverAPIWriteReviewsLooseLiness()
