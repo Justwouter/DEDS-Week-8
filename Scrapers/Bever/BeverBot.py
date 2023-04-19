@@ -11,7 +11,7 @@ import selenium.webdriver.support.ui as ui
 import BeverAPI
 
 
-url = "https://www.bever.nl/c/heren/schoenen.html"
+url = "https://www.bever.nl/c/heren/jassen.html"
 outputpath = os.path.dirname(__file__)+'/output/'
 outputfile = os.path.dirname(__file__)+'/output/Beverbot.csv'
 products = []
