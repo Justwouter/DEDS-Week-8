@@ -14,6 +14,7 @@ import BeverAPI
 url = "https://www.bever.nl/c/heren/schoenen.html"
 outputpath = os.path.dirname(__file__)+'/output/'
 outputfile = os.path.dirname(__file__)+'/output/Beverbot.csv'
+imageoutputpath = outputpath+"Images/"
 products = []
 productNrs = []
 wait = None
@@ -115,11 +116,17 @@ def stringInOutput(item):
     return False
 
 def setupOutputFile():
+    EnsureFileExists(imageoutputpath)
     with open(outputfile, 'w', encoding="utf8", newline="") as out:
         out.write("")
         
         
-
+def EnsureFileExists(outfile):
+    directory = os.path.dirname(outfile)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    if not os.path.exists(outfile):
+        open(outfile, 'w').close()
 
 
 
