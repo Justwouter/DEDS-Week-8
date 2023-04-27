@@ -43,6 +43,7 @@ def BeverLoadFindAllURLs(browser:webdriver.Firefox, baseurl):
     for i in range(pageAmount):
         url = baseurl+"?page="+str(i)
         links.extend(BeverGetURLFromPage(browser, url))
+        print("Found " + url)
     return links
         
 def BeverGetURLFromPage(browser:webdriver.Firefox, page):
@@ -138,19 +139,17 @@ class MyThread(Thread):
     def run(self):
         threadName = self.name
         browser = getBrowser()
-        while len(links) > 0:
-            
-            lock.acquire()
-            link = links.pop()
-            lock.release()
-            
-            if BeverGetProductData(browser, link):
-                print(threadName +" Finished "+ BeverAPI.BeverGetSKUNr(link))
-            else:
-                print(threadName +" Skipped "+ BeverAPI.BeverGetSKUNr(link))
-        
-        browser.close()
-
+        with getBrowser() as browser:
+            while len(links) > 0:
+                
+                lock.acquire()
+                link = links.pop()
+                lock.release()
+                
+                if BeverGetProductData(browser, link):
+                    print(threadName +" Finished "+ BeverAPI.BeverGetSKUNr(link))
+                else:
+                    print(threadName +" Skipped "+ BeverAPI.BeverGetSKUNr(link))
         
 
 def create_threads():
@@ -167,8 +166,9 @@ def create_threads():
     for product in products:
         writeToOutput(product)
         
-    BeverAPI.BeverAPIWriteDataToJsonFile()
     BeverAPI.BeverAPIWriteDataAsLinesToCSVFile()
+    BeverAPI.BeverAPIWriteDataToJsonFile()
+    BeverAPI.BeverAPIWriteReviewsLooseLiness()
     print(len(productNrs))
     
     end_time = time.time()
